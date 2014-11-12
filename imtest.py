@@ -60,7 +60,7 @@ for x in range(0,Bim.size[0]):
 maxEnery=Energy(Bim,Bim)
 maxEneryIm=Bim.copy()
 print "origin:",maxEnery
-for i in range(0,1000):
+for i in range(0,100000):
 	Cim=maxEneryIm.copy()
 	CpixData=Cim.load()
 	for j in range(0,1):
