@@ -4,9 +4,9 @@ import copy
 import random
 im=Image.open("origin.jpg")
 #参数
-h=10
-B=2
-u=2.1
+h=4
+B=4.1
+u=1
 def Energy(Z,A):
 	ZpixData=Z.load()
 	ApixData=A.load()
@@ -25,6 +25,7 @@ def Energy(Z,A):
 		for y in range(Z.size[1]-1):
 			E3=E3+ZpixData[x,y]*ApixData[x,y]
 	E3=E3*u
+	#print "E: ",E1,E2,E3
 	return (E1-E2-E3)
 
 ###二值化原始图片并保存在bin-vlue.bmp 阀值固定250#### 
@@ -47,7 +48,7 @@ for x in range(0,Bim.size[0]):
 		if tmp<1:
 			pixData[(x,y)]=not(pixData[(x,y)])
 #Bim.show()
-Bim.save("bin-value-noise.bmp","BMP")
+Bim.save("noised.bmp","BMP")
 
 ##把0变成-1
 for x in range(0,Bim.size[0]):
@@ -55,28 +56,27 @@ for x in range(0,Bim.size[0]):
 		if pixData[x,y]==0:
 			pixData[x,y]=-1
 
-###随机生成1000个选最优的###
+###随机生成选最优###
 maxEnery=Energy(Bim,Bim)
+maxEneryIm=Bim.copy()
 print "origin:",maxEnery
-mpos=0
-imgs=[]
-for i in range(0,100):
-	imgs.append(Bim.copy())
-	CpixData=imgs[i].load()
-	for j in range(0,100):
+for i in range(0,1000):
+	Cim=maxEneryIm.copy()
+	CpixData=Cim.load()
+	for j in range(0,1):
 		ranx=int(random.uniform(0,256))
 		rany=int(random.uniform(0,256))
 		CpixData[ranx,rany]=not(CpixData[ranx,rany])
-	E=Energy(Bim,imgs[i])
+	E=Energy(Bim,Cim)
 	if E<maxEnery:
 		print E
 		maxEnery=E
-		mpos=i
+		maxEneryIm=Cim.copy()
 
 ###输出并保存###
-mpixData=imgs[mpos].load()
+mpixData=maxEneryIm.load()
 for x in range(0,256):
 	for y in range(0,256):
 		if mpixData[x,y]==-1:
 			mpixData[x,y]=0
-imgs[mpos].save("denoised.bmp","BMP")
+maxEneryIm.save("denoised.bmp","BMP")
