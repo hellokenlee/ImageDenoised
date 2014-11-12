@@ -6,7 +6,7 @@ im=Image.open("origin.jpg")
 #参数
 h=0
 B=1
-u=0
+u=2.1
 dx=[0,0 ,1,1, 1,-1,-1,-1]
 dy=[1,-1,0,1,-1, 1,-1, 0]
 
@@ -15,13 +15,13 @@ def energyforone(Z,A,x,y):
 	ZpixData=Z.load()
 	ApixData=A.load()
 	E=0
-	E=E+2*(ApixData[x,y]-0.5)*h
-	E=E-2*(ZpixData[x,y]-0.5)*(ApixData[x,y]-0.5)*u
+	E=E+(pixData[x,y]-0.5)*h
+	E=E-(ZpixData[x,y]-0.5)*(ApixData[x,y]-0.5)*u
 	for i in range(0,8):
 		x1=x+dx[i]
 		y1=y+dy[i]
 		if x1>=0 and x1<A.size[0] and y1>=0 and y1<A.size[1]:
-			E=E-2*(ApixData[x,y]-0.5)*(ApixData[x1,y1]-0.5)*B
+			E=E-(ApixData[x,y]-0.5)*(ApixData[x1,y1]-0.5)*B
 	return E
 
 ###二值化原始图片并保存在bin-vlue.bmp 阀值固定250#### 
@@ -49,7 +49,7 @@ Bim.save("noised.bmp","BMP")
 
 ###随机生成选最优###
 maxEneryIm=Bim.copy()
-for i in range(0,1000):
+for i in range(0,1000000):
 	Cim=maxEneryIm.copy()
 	CpixData=Cim.load()
 	ranx=int(random.uniform(0,256))
