@@ -4,9 +4,9 @@ import copy
 import random
 im=Image.open("origin.jpg")
 #参数
-h=4
-B=4.1
-u=1
+h=0
+B=1
+u=0
 def Energy(Z,A):
 	ZpixData=Z.load()
 	ApixData=A.load()
@@ -27,6 +27,34 @@ def Energy(Z,A):
 	E3=E3*u
 	#print "E: ",E1,E2,E3
 	return (E1-E2-E3)
+dx=[0,0 ,1,1, 1,-1,-1,-1]
+dy=[1,-1,0,1,-1, 1,-1, 0]
+def energyforone(Z,A,x,y):
+	ZpixData=Z.load()
+	ApixData=A.load()
+	E=0
+	E=E+2*ApixData[x,y]*h
+	E=E-2*ZpixData[x,y]*ApixData[x,y]*u
+	for i in range(0,8):
+		x1=x+dx[i]
+		y1=y+dy[i]
+		if x1>=0 and x1<A.size[0] and y1>=0 and y1<A.size[1]:
+			E=E-2*ApixData[x,y]*ApixData[x1,y1]*B
+
+##	x1=x-1
+#	if x1>=0:
+#		E=E-2*ApixData[x,y]*ApixData[x1,y]*B
+#	x1=x+1
+#	if x1<A.size[1]:
+#		E=E-2*ApixData[x,y]*ApixData[x1,y]*B
+#	y1=y-1
+#	if y1>=0:
+#		E=E-2*ApixData[x,y]*ApixData[x,y1]*B
+#	y1=y+1
+#	if y1<A.size[0]:
+#		E=E-2*ApixData[x,y]*ApixData[x,y1]*B
+#	x1=x-1
+	return E
 
 ###二值化原始图片并保存在bin-vlue.bmp 阀值固定250#### 
 Lim=im.convert("L")
@@ -57,20 +85,16 @@ for x in range(0,Bim.size[0]):
 			pixData[x,y]=-1
 
 ###随机生成选最优###
-maxEnery=Energy(Bim,Bim)
 maxEneryIm=Bim.copy()
-print "origin:",maxEnery
-for i in range(0,1000):
+for i in range(0,60000):
 	Cim=maxEneryIm.copy()
 	CpixData=Cim.load()
-	for j in range(0,1):
-		ranx=int(random.uniform(0,256))
-		rany=int(random.uniform(0,256))
-		CpixData[ranx,rany]=not(CpixData[ranx,rany])
-	E=Energy(Bim,Cim)
-	if E<maxEnery:
+	ranx=int(random.uniform(0,256))
+	rany=int(random.uniform(0,256))
+	CpixData[ranx,rany]=not(CpixData[ranx,rany])
+	E=energyforone(Bim,Cim,ranx,rany)
+	if E<0:
 		print E
-		maxEnery=E
 		maxEneryIm=Cim.copy()
 
 ###输出并保存###
