@@ -4,29 +4,25 @@ import copy
 import random
 im=Image.open("origin.jpg")
 #参数
-h=4
-B=4.1
-u=1
-def Energy(Z,A):
+h=0
+B=1
+u=0
+dx=[0,0 ,1,1, 1,-1,-1,-1]
+dy=[1,-1,0,1,-1, 1,-1, 0]
+
+#更改能量函数
+def energyforone(Z,A,x,y):
 	ZpixData=Z.load()
 	ApixData=A.load()
-	E1=0
-	for x in range(Z.size[0]):
-		for y in range(Z.size[1]):
-			E1=E1+ApixData[x,y]
-	E1=E1*h
-	E2=0
-	for x in range(Z.size[0]-1):
-		for y in range(Z.size[1]-1):
-			E2=E2+ApixData[x,y]*ApixData[x+1,y]+ApixData[x,y]*ApixData[x,y+1]
-	E2=E2*B
-	E3=0
-	for x in range(Z.size[0]-1):
-		for y in range(Z.size[1]-1):
-			E3=E3+ZpixData[x,y]*ApixData[x,y]
-	E3=E3*u
-	#print "E: ",E1,E2,E3
-	return (E1-E2-E3)
+	E=0
+	E=E+2*(ApixData[x,y]-0.5)*h
+	E=E-2*(ZpixData[x,y]-0.5)*(ApixData[x,y]-0.5)*u
+	for i in range(0,8):
+		x1=x+dx[i]
+		y1=y+dy[i]
+		if x1>=0 and x1<A.size[0] and y1>=0 and y1<A.size[1]:
+			E=E-2*(ApixData[x,y]-0.5)*(ApixData[x1,y1]-0.5)*B
+	return E
 
 ###二值化原始图片并保存在bin-vlue.bmp 阀值固定250#### 
 Lim=im.convert("L")
@@ -50,33 +46,23 @@ for x in range(0,Bim.size[0]):
 #Bim.show()
 Bim.save("noised.bmp","BMP")
 
-##把0变成-1
-for x in range(0,Bim.size[0]):
-	for y in range(0,Bim.size[1]):
-		if pixData[x,y]==0:
-			pixData[x,y]=-1
 
 ###随机生成选最优###
-maxEnery=Energy(Bim,Bim)
 maxEneryIm=Bim.copy()
-print "origin:",maxEnery
-for i in range(0,100000):
+for i in range(0,1000):
 	Cim=maxEneryIm.copy()
 	CpixData=Cim.load()
-	for j in range(0,1):
-		ranx=int(random.uniform(0,256))
-		rany=int(random.uniform(0,256))
-		CpixData[ranx,rany]=not(CpixData[ranx,rany])
-	E=Energy(Bim,Cim)
-	if E<maxEnery:
-		print E
-		maxEnery=E
+	ranx=int(random.uniform(0,256))
+	rany=int(random.uniform(0,256))
+	CpixData[ranx,rany]=not(CpixData[ranx,rany]);
+	E=energyforone(Bim,Cim,ranx,rany)
+	if E<0:
+		print str(int(not(CpixData[ranx,rany])))+"->"+str(CpixData[ranx,rany])+":",
+		print "change("+str(ranx)+","+str(rany)+")"+str(E)+":",
+		for i in range(0,8):
+			print pixData[ranx+dx[i],rany+dy[i]],
+		print "\n"
 		maxEneryIm=Cim.copy()
 
 ###输出并保存###
-mpixData=maxEneryIm.load()
-for x in range(0,256):
-	for y in range(0,256):
-		if mpixData[x,y]==-1:
-			mpixData[x,y]=0
 maxEneryIm.save("denoised.bmp","BMP")
